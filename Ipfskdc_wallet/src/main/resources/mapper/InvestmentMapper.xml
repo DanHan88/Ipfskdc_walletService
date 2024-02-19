@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wallet.system.mapper.InvestmentMapper">
+
+	<select id="selectInvestmentList" resultType="com.wallet.system.vo.InvestmentVO">
+		select 
+			A.investment_id,
+			C.user_email AS user_email,
+			C.user_name  AS user_name,
+			C.user_id AS user_id,
+			B.investment_category_name AS product_name,
+			B.cateogry_fil_per_tb AS cateogry_fil_per_tb,
+			B.investment_category_index AS investment_category_id,
+			A.purchase_date,
+			A.purchase_size,
+			A.fil_invested
+		 from Investment_Info AS A
+		 INNER JOIN Investment_Category AS B ON A.investment_category_id = B.investment_category_index
+		 INNER JOIN User_Info AS C ON A.user_id  = C.user_id
+		 WHERE B.status ='사용' AND A.status='active' AND C.user_status='정상' AND B.on_all_search='포함'
+	</select>
+	<select id="selectTokenPaidVOList" resultType="com.wallet.system.vo.TokenPaidVO">
+		SELECT 
+		    A.token_paid_id,
+		    A.paid_date,
+		    A.fil_paid_per_tb,
+		    A.admin_id,
+		    A.status,
+		    A.update_date,
+		    COUNT(DISTINCT s.investment_category_index) AS unique_category_count,
+		    CASE
+  			WHEN COUNT(DISTINCT s.investment_category_index) > 2 THEN '다중지급'
+  			WHEN ic.status IN ('개인전송', '개인차감') THEN GROUP_CONCAT(DISTINCT ic.investment_category_name, '(', CONVERT(ui.user_name, CHAR), ')')
+ 			 ELSE GROUP_CONCAT(DISTINCT ic.investment_category_name)
+			END AS payout_category_name,
+		    (SELECT SUM(B.paid_fil) FROM TokenPaid_detail_info B WHERE B.token_paid_id = A.token_paid_id) AS total_paid
+		FROM 
+		    TokenPaid_Info A
+		JOIN
+		    TokenPaid_detail_info s ON A.token_paid_id = s.token_paid_id
+		JOIN
+		    Investment_Category ic ON ic.investment_category_index = s.investment_category_index
+		LEFT JOIN
+		    User_Info ui ON ui.user_id = s.user_id
+		GROUP BY
+		    A.token_paid_id
+	</select>
+	<select id="selectTokenDetailList" parameterType="com.wallet.system.vo.TokenPaidVO" resultType="com.wallet.system.vo.TokenPaidDetailVO">
+		select * from TokenPaid_detail_info A 
+		inner join User_Info ui 
+		ON A.user_id =ui.user_id 
+		inner join Investment_Category ic 
+		ON A.investment_category_index = ic.investment_category_index
+		where token_paid_id = #{token_paid_id}
+	</select>
+	<select id="getInvestmentListByCategory" parameterType="integer" resultType="com.wallet.system.vo.InvestmentVO">
+		select 
+			A.investment_id,
+			C.user_email AS user_email,
+			C.user_name  AS user_name,
+			C.user_id AS user_id,
+			B.investment_category_index AS investment_category_id,
+			B.investment_category_name AS product_name,
+			B.cateogry_fil_per_tb AS cateogry_fil_per_tb,
+			A.purchase_date,
+			A.purchase_size,
+			A.fil_invested
+		 from Investment_Info AS A
+		 INNER JOIN Investment_Category AS B ON A.investment_category_id = B.investment_category_index
+		 INNER JOIN User_Info AS C ON A.user_id  = C.user_id
+		 WHERE B.investment_category_index  =  #{category_index} AND A.status='active' AND C.user_status='정상'
+	</select>
+		<select id="selectInvestmentCategoryByIndex" parameterType="integer" resultType="com.wallet.system.vo.InvestmentCategoryVO">
+		select 
+			investment_category_index,
+			investment_category_name,
+			status,
+			on_all_search
+		 from Investment_Category
+		 where investment_category_index = #{category_index}	
+	</select>
+	<select id="selectInvestmentCategoryList" resultType="com.wallet.system.vo.InvestmentCategoryVO">
+		select 
+			investment_category_index,
+			investment_category_name,
+			cateogry_fil_per_tb,
+			status,
+			on_all_search
+		 from Investment_Category	
+		 where status = '사용'
+	</select>
+	<select id="findAdminByAdminId" parameterType="string" resultType="com.wallet.system.vo.LoginVO">
+		select 
+			id,password
+		 from Admin_Info
+		 where id=#{id}
+	</select>
+	<select id="selectIDList" resultType="string">
+		select 
+			investment_id
+		 from Investment_Info
+		 WHERE status ='active'
+	</select>
+	<select id="selectUserInfoList"  resultType="com.wallet.system.vo.UserInfoVO">
+		SELECT 
+		    u.user_id,
+		    u.user_reg_date,
+		    (SELECT COALESCE(SUM(tpdi.paid_fil), 0) from TokenPaid_detail_info tpdi inner join TokenPaid_Info tpi ON tpi.token_paid_id =tpdi.token_paid_id WHERE tpi.status='정상' AND u.user_id =tpdi.user_id) 
+			- (SELECT COALESCE(SUM(fil_amount), 0) from Wallet_Withdrawals ww WHERE ww.user_id = u.user_id AND ww.status ='승인') AS fil_amount,
+		    u.user_name,
+		    u.user_email,
+		    u.user_status,
+		    u.user_phone,
+		    u.profile_picture_url,
+		    (SELECT COUNT(i.investment_id) FROM Investment_Info i Inner Join Investment_Category ic ON i.investment_category_id =ic.investment_category_index WHERE i.user_id = u.user_id AND i.status = 'active' AND ic.status ='사용') AS investment_count
+		FROM 
+		    User_Info u	
+		WHERE 
+		    u.user_status != '중지'
+		GROUP BY 
+		    u.user_email
+	</select>
+	<select id="selectUserMemo" parameterType="com.wallet.system.vo.UserInfoVO" resultType="com.wallet.system.vo.MemoVO">
+		select 
+			id,user_id,memo,reg_date,admin_id
+		 from Memo
+		 WHERE user_id = #{user_id}
+	</select>
+	<select id="selectRequestFilList" resultType="com.wallet.system.vo.WalletWithdrawalVO">
+		SELECT
+		    ww.wallet_withdrawals_id,
+		    ww.user_id,
+		    ww.fil_amount,
+		    ww.status,
+		    ww.message,
+		    ww.wallet_address,
+		    ww.request_date,
+		    ww.encrypted_wallet,
+		    ww.complete_date,
+		    ww.memo,
+		    ww.wallet_type_name,
+		    ui.user_name,   
+		    ui.user_email 
+		FROM
+		    Wallet_Withdrawals ww
+		INNER JOIN
+		    User_Info ui ON ww.user_id = ui.user_id		
+	</select>
+	<select id="selectRequestFilById" parameterType="com.wallet.system.vo.WalletWithdrawalVO" resultType="com.wallet.system.vo.WalletWithdrawalVO">
+		SELECT
+		    ww.wallet_withdrawals_id,
+		    ww.user_id,
+		    ww.fil_amount,
+		    ww.status,
+		    ww.message,
+		    ww.wallet_address,
+		    ww.request_date,
+		    ww.encrypted_wallet,
+		    ww.complete_date,
+		    ww.memo,
+		    ui.user_name,   
+		    ui.user_email 
+		FROM
+		    Wallet_Withdrawals ww
+		INNER JOIN
+		    User_Info ui ON ww.user_id = ui.user_id
+		 WHERE ww.wallet_withdrawals_id = #{wallet_withdrawals_id} 	
+	</select>
+	
+	<update  id="updateStatus" parameterType="com.wallet.system.vo.WalletWithdrawalVO" >
+		update Wallet_Withdrawals
+		SET status = #{is_request_state}
+		 <if test="memo != null">
+           , memo = #{memo}
+         </if>
+         <if test="message != null">
+           , message = #{message}
+         </if>
+     
+		Where wallet_withdrawals_id = #{wallet_withdrawals_id}
+			
+	</update >
+	<insert id="addNewProductCategory" parameterType="com.wallet.system.vo.InvestmentCategoryVO">
+		insert  into Investment_Category (investment_category_name,cateogry_fil_per_tb, status,on_all_search)
+		VALUES(#{investment_category_name},#{cateogry_fil_per_tb},'사용',#{on_all_search})	
+	</insert>
+	<insert id="regMemo" parameterType="com.wallet.system.vo.MemoVO">
+		insert  into Memo (user_id, memo, reg_date,admin_id)
+		VALUES(#{user_id},#{memo},NOW(),#{admin_id})	
+	</insert>
+	<insert id="addNewUser" parameterType="com.wallet.system.vo.UserInfoVO">
+		insert  into User_Info (user_phone,user_status,user_reg_date,fil_amount,user_name,user_email,profile_picture_url)
+			VALUES(#{user_phone},'정상',NOW(),0,#{user_name},#{user_email},#{profile_picture_url})
+	</insert>
+	<insert id="addNewInvestment" parameterType="com.wallet.system.vo.InvestmentVO">
+		insert  into Investment_Info (purchase_date,purchase_size,user_id,investment_category_id,status,fil_invested)
+			VALUES(#{purchase_date},#{purchase_size},#{user_id},#{investment_category_id},'active',#{fil_invested})
+	</insert>
+	<insert id="addNewTokenPaidInfo" parameterType="com.wallet.system.vo.TokenPaidVO">
+		insert  into TokenPaid_Info (token_paid_id,paid_date,fil_paid_per_tb,admin_id,status)
+			VALUES(#{token_paid_id},NOW(),#{fil_paid_per_tb},#{admin_id},'정상')
+	</insert>
+	<update id="updateTokenPaidInfo" parameterType="com.wallet.system.vo.TokenPaidVO">
+			UPDATE TokenPaid_Info
+			SET
+		    fil_paid_per_tb = #{fil_paid_per_tb},
+		    status = #{status}
+			WHERE
+		    token_paid_id = #{token_paid_id}
+	</update>
+
+	<update id="updateTokenPaidDetailInfo" parameterType="com.wallet.system.vo.TokenPaidDetailVO">
+			UPDATE TokenPaid_detail_info
+			SET
+		    paid_fil = paid_fil * #{fil_paid_ratio_change}
+			WHERE
+		    token_paid_id = #{token_paid_id}
+	</update>
+	<update id="updatePersonalTokenPaidDetailInfo" parameterType="com.wallet.system.vo.TokenPaidDetailVO">
+			UPDATE TokenPaid_detail_info
+			SET
+		    paid_fil = #{fil_paid_per_tb}
+			WHERE
+		    token_paid_id = #{token_paid_id}
+	</update>
+	<insert id="addNewTokenPaidDetailInfo" parameterType="com.wallet.system.vo.TokenPaidDetailVO">
+		insert  into TokenPaid_detail_info (token_paid_detail_id,user_id,paid_fil,token_paid_id,investment_category_index)
+			VALUES(#{token_paid_detail_id},#{user_id},#{paid_fil},#{token_paid_id},#{investment_category_index})
+	</insert>
+	<select id="selectLastTokenPaidInfo" resultType="double">
+		SELECT token_paid_id
+		FROM TokenPaid_Info
+		ORDER BY token_paid_id DESC
+		LIMIT 1
+	</select>
+	
+	<insert id="modifyInvestment" parameterType="com.wallet.system.vo.InvestmentVO">
+		UPDATE Investment_Info
+			SET
+			investment_category_id = #{investment_category_id},
+		    purchase_date = #{purchase_date},
+		    purchase_size = #{purchase_size},
+		    fil_invested =  #{fil_invested},
+		    on_all_search = #{on_all_search}
+			WHERE
+		    investment_id = #{investment_id}
+	</insert>
+	<insert id="deleteInvestment" parameterType="com.wallet.system.vo.InvestmentVO">
+		UPDATE Investment_Info
+			SET
+			status ='deleted'
+			WHERE
+		    investment_id = #{investment_id}
+	</insert>
+	<update id="updateUser" parameterType="com.wallet.system.vo.UserInfoVO">
+		  UPDATE User_Info
+		  <set>
+		    <if test="user_phone != null">user_phone = #{user_phone},</if>
+		    <if test="user_status != null">
+		      user_status = #{user_status},
+		      <if test="user_status eq '중지'">user_email = '',</if>
+		    </if>
+		    <if test="user_name != null">user_name = #{user_name},</if>
+		    <if test="user_email != null">
+		      <if test="user_status neq '중지'">user_email = #{user_email},</if>
+		    </if>
+		    <if test="profile_picture_url != 'no_change'">
+		      profile_picture_url = #{profile_picture_url}
+		    </if>
+		  </set>
+		  WHERE user_id = #{user_id}
+
+	</update>
+	
+	<update id="userPwReset" parameterType="com.wallet.system.vo.UserInfoVO">
+		  UPDATE User_Info
+		  set password='$2a$10$swtbwzaZZjnnHAoAmGbUZOCekqeAtaCJoKiYZgtGvVqOZHipPi0iW'
+		  WHERE user_id = #{user_id}
+
+	</update>
+	<select id="verifyUserInfoVO" parameterType="com.wallet.system.vo.UserInfoVO" resultType="com.wallet.system.vo.UserInfoVO">
+		select 
+			user_id,
+			user_phone,
+			user_status,
+			user_reg_date,
+			fil_amount,
+			user_name,
+			user_email,
+			profile_picture_url
+		 from User_Info
+		where user_email=#{user_email}
+	</select>
+	<select id="getUserPassword" parameterType="string" resultType="string">
+		select 
+			password
+		 from User_Info
+		where user_email=#{user_email}
+	</select>
+	<update id="updateProductCategory" parameterType="com.wallet.system.vo.InvestmentCategoryVO">
+		UPDATE Investment_Category
+			SET
+		    investment_category_name = #{investment_category_name},
+		    status = #{status},
+		    cateogry_fil_per_tb=#{cateogry_fil_per_tb},
+		    on_all_search =#{on_all_search}
+			WHERE
+		    investment_category_index = #{investment_category_index}
+	</update>
+	<select id="verifyProductCategory" parameterType="string" resultType="com.wallet.system.vo.InvestmentCategoryVO">
+		select 
+			investment_category_index,
+			investment_category_name,
+			cateogry_fil_per_tb,
+			status
+		 from Investment_Category
+		where Investment_category_name=	#{product_name}	
+	</select>
+	<select id="selectInvestmentListForUser" parameterType="integer" resultType="com.wallet.system.vo.InvestmentVO">
+		select 
+			investment_id,
+			B.investment_category_name AS product_name,
+			B.cateogry_fil_per_tb AS cateogry_fil_per_tb,
+			purchase_date,
+			purchase_size,
+			fil_invested,
+			user_id,
+			investment_category_id
+		 from Investment_Info A
+		 INNER JOIN Investment_Category AS B ON A.investment_category_id = B.investment_category_index
+		where user_id =	#{user_id} AND 	B.status='사용' AND A.status='active'
+	</select>
+	
+	<select id="selectEvents" resultType="com.wallet.system.vo.EventsAnnouncementVO">
+		SELECT id, reg_date, title, body, admin, event_or_announcement
+			FROM ipfskdcw.events_announcements 
+			WHERE event_or_announcement ='이벤트'
+			ORDER BY reg_date DESC
+	</select>
+	<select id="selectAnnouncements" resultType="com.wallet.system.vo.EventsAnnouncementVO">
+		SELECT id, reg_date, title, body, admin, event_or_announcement
+			FROM ipfskdcw.events_announcements 
+			WHERE event_or_announcement ='공지사항'
+			ORDER BY reg_date DESC
+	</select>
+	
+	<insert id="insertAnnouncement" parameterType="com.wallet.system.vo.EventsAnnouncementVO">
+	    INSERT INTO ipfskdcw.events_announcements
+	    (reg_date, title, body, admin, event_or_announcement)
+	    VALUES
+	    (NOW(), #{title}, #{body}, #{admin}, #{event_or_announcement})
+	</insert>
+	
+	<update id="updateAnnouncement" parameterType="com.wallet.system.vo.EventsAnnouncementVO">
+	    UPDATE ipfskdcw.events_announcements
+	    SET title = #{title}, body = #{body}
+	    WHERE id = #{id}
+	</update>
+	
+	<update id="deleteAnnouncement" parameterType="com.wallet.system.vo.EventsAnnouncementVO">
+	    UPDATE ipfskdcw.events_announcements
+	    SET event_or_announcement= #{event_or_announcement}
+	    WHERE id = #{id}
+	</update>
+	
+	<update id="update_Admin_Password" parameterType="com.wallet.system.vo.LoginVO">
+	    UPDATE ipfskdcw.Admin_Info
+	    SET password = #{new_password}
+	    WHERE id = #{id}
+	</update>
+	
+	
+
+
+		
+</mapper>

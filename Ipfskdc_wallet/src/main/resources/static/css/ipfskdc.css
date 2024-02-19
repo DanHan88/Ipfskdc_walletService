@@ -1,0 +1,39 @@
+.bg-sidebar-custom{
+  background: url("/img/sidebar_bg.png");
+  background-size: cover;
+}
+.bg-login-image-custom{
+  background: url("/img/login_img.png");
+ background-position: center;
+  background-size: cover;
+}
+
+  .user-update-button {
+            background: url('/img/user_update.png') no-repeat center center;
+		    background-size: contain; /* Adjusted to 'contain' */
+		    height: 50px;
+		    width: 150px;
+		    border: none;
+		    cursor: pointer;
+        }
+   .user-logout-button {
+            background: url('/img/logout.png') no-repeat center center;
+		    background-size: contain; /* Adjusted to 'contain' */
+		    height: 50px;
+		    width: 150px;
+		    border: none;
+		    cursor: pointer;
+        } 
+        .user-community-button {
+            background: url('/img/ipfs_icon.png') no-repeat center center;
+		    background-size: contain; /* Adjusted to 'contain' */
+		    height: 50px;
+		    width: 150px;
+		    border: none;
+		    cursor: pointer;
+        }         
+i img {
+            width: 20px; /* Adjust the width as needed */
+            height: 20px; /* Adjust the height as needed */
+        }
+
