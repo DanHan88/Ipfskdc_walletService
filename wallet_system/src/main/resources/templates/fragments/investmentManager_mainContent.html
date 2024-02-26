@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	
+      <div  th:fragment="MainContent">
+			<script th:inline="javascript">
+		        /*<![CDATA[*/
+		        var listInvestment = /*[[${listInvestment}]]*/ [];
+		        /*]]>*/
+		    </script>
+		  <div class="modal fade" id="create_product_manager" tabindex="-1" role="dialog">
+				  <div class="modal-dialog modal-lg" style="overflow:auto; height:800px;">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title">투자상품 관리</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">×</span>
+							</button>
+						</div>
+						<div class="modal-body">	
+							<div class="card">
+								<div class="card-header">
+									<button id="add_new_product_btn" type="button" class="btn btn-primary btn-sm float-right" style="margin-top: 0px;">상품 등록</button>
+													
+								</div>								
+								<div class="card-block table-responsive">
+									<table id="node_product_table" class="table table-hover table-bordered table-sm">
+										<colgroup><col width="30%">
+										<col width="20%">
+										<col width="15%">
+										<col width="20%">
+										<col width="15%">				
+										</colgroup><thead>
+											<tr>
+												<th class="text-center">상품명</th>
+												<th class="text-center">Fil배분률%</th>
+												<th class="text-center">상태</th>
+												<th class="text-center">일괄지급</th>
+												<th class="text-center"></th>
+											</tr>
+										</thead>									
+										<tbody>
+											<tr th:each="category : ${listInvestmentCategory}">
+												<td align="center" th:text="${category.investment_category_name}" id="investment_category_name"></td>
+												<td align="center" th:text="${category.cateogry_fil_per_tb}" id="cateogry_fil_per_tb"></td>
+												<td align="center" th:text="${category.status}" id="investment_status" th:style="${category.status == '사용' ? 'color: green;' : 'color: red;'}"></td>
+												<td align="center" th:text="${category.on_all_search}" id="on_all_search" th:style="${category.on_all_search == '포함' ? 'color: green;' : 'color: red;'}"></td>
+												<td align="center"><button type="button" class="btn btn-secondary btn-sm update_product_btn" th:value="${category.investment_category_index}">상세</button></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+						</div>						
+					</div>
+				</div>
+				  </div>
+				  
+				  <div class="modal fade" id="create_new_product" tabindex="-1" role="dialog">
+		  <div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title">투자상품 추가</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">×</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<div class="form-group row">
+								<label class="col-md-2 form-control-label" style="margin-top:5px;"><b>상품명</b></label>
+								<div class="col-md-10">
+									<input id="new_product_name" class="form-control" type="text">
+								</div>									
+							</div>	
+							<div class="form-group row">
+								<label class="col-md-3 form-control-label" style="margin-top:5px;"><b>배분율(%)</b></label>
+								<div class="col-md-9">
+									<input id="new_cateogry_fil_per_tb" class="form-control" type="number" value="100">
+								</div>									
+							</div>
+							<div class="form-group row">
+								<label class="col-md-3 form-control-label" style="margin-top:5px;"><b>일괄지급</b></label>
+								<div class="col-md-9 mt-2" >
+									<label>
+										<input type="radio"  name="on_all_search_add" value="포함">
+											포함
+										</label>
+										<label>
+										<input type="radio"   name="on_all_search_add" value="제외">
+											제외
+									</label>
+								</div>									
+							</div>																																			
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+							<button id="add_new_product_ajax" type="button" class="btn btn-primary" >상품 등록</button>
+						</div>
+					</div>
+				</div>
+		  </div>
+		  <div class="modal fade" id="update_product" tabindex="-1" role="dialog">
+		  <div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title">투자상품 수정</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">×</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<div class="form-group row">
+								<label class="col-md-3 form-control-label" style="margin-top:5px;"><b>상품명</b></label>
+								<div class="col-md-9">
+									<input id="update_product_name" class="form-control" type="text">
+								</div>									
+							</div>	
+							<div class="form-group row">
+								<label class="col-md-3 form-control-label" style="margin-top:5px;"><b>배분율(%)</b></label>
+								<div class="col-md-9">
+									<input id="update_cateogry_fil_per_tb" class="form-control" type="number" value="100">
+								</div>									
+							</div>					
+							<div class="form-group row">
+								<label class="col-md-3 form-control-label" style="margin-top:5px;"><b>상태</b></label>
+								<div class="col-md-9 mt-2" >
+									<label>
+										<input type="radio"  name="investment_status" value="사용">
+											사용
+										</label>
+										<label>
+										<input type="radio"   name="investment_status" value="중지">
+											삭제
+									</label>
+								</div>									
+							</div>	
+							<div class="form-group row">
+								<label class="col-md-3 form-control-label" style="margin-top:5px;"><b>일괄지급</b></label>
+								<div class="col-md-9 mt-2" >
+									<label>
+										<input type="radio"  name="on_all_search" value="포함">
+											포함
+										</label>
+										<label>
+										<input type="radio"   name="on_all_search" value="제외">
+											제외
+									</label>
+								</div>									
+							</div>																											
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+							<button id="node_product_edit_btn" type="button" class="btn btn-danger">수정</button>
+						</div>
+					</div>
+				</div>
+		</div>
+		<div class="modal fade" id="payout_list_modal" tabindex="-1" role="dialog">
+				  <div class="modal-dialog modal-lg" style="overflow:auto; height:800px;">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title">배분 대상</h6>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">×</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<div class="card">
+								<div class="card-header">
+									<button id="payout_confirm_button" type="button" class="btn btn-primary btn-sm float-right" style="margin-top: 0px;">지급하기</button>			
+								</div>								
+								<div class="card-block table-responsive">
+									<table id="payout_confirmation_table" class="table table-hover table-bordered table-sm">
+										<colgroup><col width="40%">
+										<col width="20%">
+										<col width="30%">
+										<col width="10%">				
+										</colgroup><thead>
+											<tr>
+												<th>이메일</th>
+												<th>회원명</th>
+												<th>투자상품명</th>
+												<th>FIL</th>
+											</tr>
+										</thead>									
+										<tbody>
+											<tr>
+												
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+						</div>						
+					</div>
+				</div>
+				  </div>
+		 
+			 <div class="modal fade" id="alert2_modal" tabindex="-1" role="dialog">
+				  <div class="modal-dialog" role="document">
+				    <div class="modal-content">
+				      <div class="modal-header bg-warning">
+				        <h5 class="modal-title text-white " id="alert2_title">입력값을 확인해주십시오</h5>
+				        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+				          <span aria-hidden="true">&times;</span>
+				        </button>
+				      </div>
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-secondary" data-dismiss="modal">확인</button>
+				      </div>
+				    </div>
+				  </div>
+			</div>
+			<div class="modal fade" id="loadingModal_investment" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">
+			    <div class="modal-dialog" role="document">
+			        <div class="modal-content">
+			            <div class="modal-header">
+			                <h5 class="modal-title text-dark" id="loadingModalLabel">프로세스 진행중</h5>
+			            </div>
+			            <div class="modal-body text-center">
+			                <div class="spinner-border text-primary" role="status">
+			                    <span class="sr-only">프로세스 진행중</span>
+			                </div>
+			            </div>
+			        </div>
+			    </div>
+			</div>
+			<div class="modal fade" id="session_alert_investment" tabindex="-1" role="dialog">
+				  <div class="modal-dialog" role="document">
+				    <div class="modal-content">
+				      <div class="modal-header bg-warning">
+				        <h5 class="modal-title text-white">세션이 종료되었습니다. 다시 로그인 하십시오.</h5>
+				        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+				          <span aria-hidden="true">&times;</span>
+				        </button>
+				      </div>
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-secondary" data-dismiss="modal">확인</button>
+				      </div>
+				    </div>
+				  </div>
+			</div>
+			<div class="modal fade" id="alert_modal" tabindex="-1" role="dialog">
+				  <div class="modal-dialog" role="document">
+				    <div class="modal-content">
+				      <div class="modal-header bg-success" id="alert_header">
+				        <h5 class="modal-title text-white " id="alert_title">제품 등록 성공</h5>
+				        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+				          <span aria-hidden="true">&times;</span>
+				        </button>
+				      </div>
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-secondary" data-dismiss="modal">확인</button>
+				      </div>
+				    </div>
+				  </div>
+			</div>
+                <span class="container-fluid" id="dataTableContainer" style="display: none;">
+                    <div class="card shadow mb-2">
+						
+                        <div class="card-body">
+							<div class="dropdown mb-2 mr-3" style="float:left;">
+						  <button class="btn btn-primary dropdown-toggle" id="category_select_title" type="button" data-toggle="dropdown" aria-expanded="false">
+						    투자 상품별 조회
+						  </button>
+						  <h1 th:text="${sb}"></h1>
+						  <div class="dropdown-menu"  style="max-height: 600px; overflow-y: auto;">
+							  <a class="dropdown-item" th:href="@{/main(category=0)}" th:text="전체조회" th:value="0"></a>
+							  <div th:each="category : ${listInvestmentCategory}" th:if="${category.status == '사용'}">
+											 <a class="dropdown-item" th:href="@{/main(category=${category.investment_category_index})}" th:text="${category.investment_category_name}" th:value="${category.investment_category_index}"></a>
+                                        </div>
+                                        </div>
+						</div>
+							<button class="btn btn-primary mr-3" type="button" id="create_product_manager_button">
+						    투자 상품 관리
+						  </button>
+                            <div class="table-responsive" >
+                                <table class="table table-bordered " id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+											<th scope="col"></th>
+                                            <th scope="col">이메일</th>
+                                            <th scope="col">회원명</th>
+                                            <th scope="col">투자상품명</th>
+                                            <th scope="col">용량(TiB)</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+											<th></th>
+                                            <th>이메일</th>
+                                            <th>회원명</th>
+                                            <th>투자상품명</th>
+                                            <th>용량(TiB)</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                        <tr th:each="investment : ${listInvestment}">
+											<td class="text-center"><input class="form-check-input p-0 m-0 payout_box" type="checkbox" th:value="${investment.investment_id}" checked></td>
+                                            <td th:text="${investment.user_email}"></td>
+                                            <td th:text="${investment.user_name}"></td>
+                                            <td th:text="${investment.product_name}"></td>
+                                            <td th:text="${investment.purchase_size}"></td>
+                                        </tr>
+                              
+                                    </tbody>
+                                </table>    
+                                 
+							</div>
+                            </div>
+                            
+                    </div>
+                    			<div class="row">
+								<div class="col-md-0 col-lg-6 col-xl-7"></div>
+								<div class="col-md-12 col-lg-6 col-xl-5 input-group mb-3">
+								  <div class="input-group-append"> 
+								  <button class="btn btn-secondary" type="button" id="button-addon2">지급기준 금액 1TiB =</button>
+								  </div>
+								  <input type="number" id="payout_fil_amount" class="form-control">
+								  <div class="input-group-append"> 
+								  <button class="btn btn-secondary" type="button" id="button-addon2">FIL</button>
+								  </div>
+								  <div class="input-group-append">
+								  
+								  <button class="btn btn-primary" id="payout_fil_token"><span class="text">지급하기 <i class="fa fa-chevron-right"></i></span></button>
+								</div>
+								</div>
+								</div>  
+                </div>
+                </div>
+</html>

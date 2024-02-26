@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	
+    <div  th:fragment="MainContent">
+		   <div class="modal fade" id="eventBodyModal" tabindex="-1" role="dialog">
+		    <div class="modal-dialog" role="document">
+		        <div class="modal-content">
+		            <div class="modal-header bg-primary">
+		                <h5 class="modal-title text-white">이벤트</h5>
+		                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+		                    <span aria-hidden="true">&times;</span>
+		                </button>
+		            </div>
+		            <div class="modal-body">
+						<textarea id="event_title" rows="3" cols="52" ></textarea>
+		                <textarea id="event_body" rows="15" cols="52" ></textarea>
+		            </div>
+		            <div class="modal-footer">
+						<button type="button" id="deleteButton" class="btn btn-danger"  data-dismiss="modal">삭제</button>
+						<button type="button" id="editButton" class="btn btn-info"  data-dismiss="modal">수정</button>
+		                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+		            </div>
+		        </div>
+		    </div>
+		  </div>
+		  <div class="modal fade" id="EventsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white">이벤트 작성</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- 공지사항 작성에 필요한 폼 요소들을 추가하세요 -->
+                <!-- 예를 들어, 제목과 내용 -->
+                <form id="writeEventsForm">
+                    <div class="form-group">
+                        <label for="EventsTitle">제목</label>
+                        <input type="text" id="EventsTitle" name="EventsTitle" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="EventsBody">내용</label>
+                        <textarea id="EventsBody" name="EventsBody" class="form-control" rows="5" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="submitEvents()" id = "EventsConfirm">작성 완료</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="alert_modal_user" tabindex="-1" role="dialog">
+				  <div class="modal-dialog" role="document">
+				    <div class="modal-content">
+				      <div class="modal-header bg-success" id="alert_header_user">
+				        <h5 class="modal-title text-white " id="alert_title_user">수정 완료</h5>
+				        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+				          <span aria-hidden="true">&times;</span>
+				        </button>
+				      </div>
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-secondary" data-dismiss="modal">확인</button>
+				      </div>
+				    </div>
+				  </div>
+			</div>
+			
+		  <span class="container-fluid" id="dataTableContainer" style="display: none;">
+              <div class="row">
+				<div class="col-xl-8">
+                    <div class="card shadow mb-2">
+						
+                        <div class="card-body">
+							<div class="row">
+								<div class="col-md-4">
+							<button type="button" class="btn btn-primary p-2 mb-3 w-100" data-toggle="modal" data-target="#EventsModal">
+				                이벤트 작성
+				            	</button>
+				            	</div>
+				            	</div>
+                            <div class="table-responsive" >
+                               <table class="table table-bordered " id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>날짜</th>
+											<th>제목</th>
+											<th>작성자</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                       <tr th:each="event : ${eventList}" class="eventBodyBtn" style="cursor: pointer;" th:attr="data-event-id=${event.id},data-event-dody=${event.body}, data-event-title=${event.title}">
+											<td th:text="${#dates.format(event.reg_date, 'yyyy-MM-dd HH:mm:ss')}" ></td>
+                                            <td th:text="${event.title}"></td>
+                                            <td th:text="${event.admin}"></td>
+										</tr>
+                                    </tbody>
+                                </table>      
+							</div>
+                            </div> 
+                    </div>
+                    </div>
+                    </div>
+      </div>
+</html>

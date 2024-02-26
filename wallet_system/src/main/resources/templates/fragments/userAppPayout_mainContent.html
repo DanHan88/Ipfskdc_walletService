@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	
+    <div  th:fragment="MainContent" id="webviewHeight" style="overflow-y: auto; max-height: 500px; overflow-x: hidden;">
+		  
+              <div class="row" > 
+						 <div th:each="tokenPaidDetail : ${tokenPaidDetailList}" class="col-lg-3 col-md-6 mb-2 ">
+					        <div class="card shadow h-100 py-2 m-2" style="cursor: pointer; border-radius: 15px;">
+                                <div class="card-head">
+									<b th:text="${tokenPaidDetail.investment_category_name}" class="pl-3 text-xs text-info"></b>
+									<p th:text="${#dates.format(tokenPaidDetail.paid_date, 'yyyy-MM-dd HH:mm:ss')}" class="pl-1 d-inline text-xs"></p>
+								</div>
+                                <div class="card-body mb-0 pb-0">
+                                    <div class="row">
+                                        <div class="col mr-2">
+                                            <p class="text-dark text-uppercase mb-1" th:text="${tokenPaidDetail.paid_fil.toPlainString()} + ' FIL'">
+                                                </p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col mr-2 mt-3">
+                                            <h6 class="mb-1" th:text="${tokenPaidDetail.memo}" style="color:orange;">
+                                                </h6>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col mr-2 text-right" >
+                                            <b th:text="${tokenPaidDetail.status}" th:class="'text-xs  text-secondary text-uppercase mb-1 ' + (${tokenPaidDetail.status == '취소' ? 'text-danger' : 'text-success'})">
+                                                </b>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+					    </div>
+                    </div> 
+      </div>
+</html>
