@@ -43,8 +43,8 @@
 														</div>
 													<div class="row">
 														<label class="col-5 form-control-label ml-0 mr-0 pl-0 pr-0 text-dark" style="margin-top:5px;">출금가능FIL</label>
-														<p class="col-4 pl-0 pr-0" id="available_fil" th:attr="data-available-fil=${loginVO.userInfoVO.available_balance}" th:text="${loginVO.userInfoVO.available_balance.toPlainString()} +' FIL'" style="margin-top:5px;"></p>
-														
+														<p class="col-4 pl-0 pr-0" th:text="${loginVO.userInfoVO.available_balance.toPlainString()} +' FIL'" style="margin-top:5px;"></p>
+														<input type="hidden" id="available_fil" th:value="${loginVO.userInfoVO.available_balance}" />
 														<a class="col-3 btn user-logout-button" th:href="@{/logoutUser_user}"></a>	
 														</div>
 												</div>			

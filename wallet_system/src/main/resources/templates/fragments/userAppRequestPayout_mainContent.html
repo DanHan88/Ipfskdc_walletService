@@ -170,6 +170,8 @@
 						
 						<div class="col-md-12 col-lg-6 col-xl-6">	
 							<p id="requestFundCheck" th:class="${requestFundCheck == '송금신청 가능'} ? 'text-success' : 'text-danger'" th:text="${requestFundCheck}"></p>
+							<p th:text="'1 FIL = '+${filPriceLastKoreanWon}+ '원'"></p>
+							<p id="max_fil" th:text="${filPriceLastKoreanWon}"></p>
 						</div>
 					</div>  
 					<div class="row">

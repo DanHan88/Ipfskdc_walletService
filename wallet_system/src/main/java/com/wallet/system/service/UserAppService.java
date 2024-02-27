@@ -20,7 +20,12 @@ import com.wallet.system.vo.WalletWithdrawalVO;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-
+import org.json.JSONObject;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -110,7 +115,27 @@ public class UserAppService {
 		 return "송금신청 가능";
 	}
 	
-	
+	public String checkcurrentFilPrice() {
+	    String CURRENCY_PAIR = "fil_krw";
+        String apiUrl = "https://api.korbit.co.kr/v1/ticker?currency_pair=" + CURRENCY_PAIR;
+        String last = "";
+        long timestamp=0;
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("accept", "application/json");
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, String.class);
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            String responseData = responseEntity.getBody();
+            
+            JSONObject jsonObject = new JSONObject(responseData);
+            timestamp = jsonObject.getLong("timestamp");
+            last = jsonObject.getString("last");
+        } else {
+            System.err.println("Error: " + responseEntity.getStatusCode());
+        }     
+        return last;
+	}
 	
 	}
     

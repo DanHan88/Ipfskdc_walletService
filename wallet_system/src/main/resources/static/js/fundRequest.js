@@ -4,8 +4,6 @@ $(document).ready(function() {
 	var fil_amount;
 	var wallet_address;
 	
-	
-
     $('#dataTableContainer').show();
     
     $('#confirmSuccessModal').on('hidden.bs.modal', function (e) {

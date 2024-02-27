@@ -282,6 +282,7 @@ public class UserAppController {
 	        	optionCheck = userAppService.checkUserRequestFundLimit(loginVO.getUserInfoVO().getUser_id(),adminOptionVO.getRequest_per_day());
 	        }
 	        
+	        mav.addObject("filPriceLastKoreanWon",  userAppService.checkcurrentFilPrice());
 	        mav.addObject("requestFundCheck", optionCheck);
 	        mav.addObject("existAddress",existAddress);
 	        mav.addObject("userFilAddressVO",userFilAddressVO);

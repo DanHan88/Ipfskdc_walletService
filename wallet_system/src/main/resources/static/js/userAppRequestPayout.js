@@ -1,3 +1,4 @@
+var maxFilValue=0;
 function resizeWebView() {
 						    var webViewHeight = $(window).height();  // 현재 WebView의 높이
 						    var maxContentHeight = webViewHeight  - $('#webviewTopHeight').height(); 
@@ -7,7 +8,8 @@ function resizeWebView() {
 						    });
 						}	
 $(document).ready(function() {
-	
+    maxFilValue = Math.round(950000/$('#max_fil').text());
+    $('#max_fil').text('송금 한도액 : '+maxFilValue+ 'FIL');
 	
 	 $('#wallet_option').change(function() {
             var selectedOption = $(this).val();
@@ -42,12 +44,16 @@ $(document).ready(function() {
 								$('#alert3_title').text('입력값을 확인해주세요');
 								$('#alert3_modal').modal('show');
 								return;
-							}else if(parseFloat($('#available_balance').data('available-balance'))<parseFloat($('#payout_fil_amount').val())){
+							}else if(parseFloat($('#available_fil').val())<parseFloat($('#payout_fil_amount').val())){
 								$('#alert3_title').text('출금가능액을 초과하셨습니다');
 								$('#alert3_modal').modal('show');
 								
 								return;
-							}		
+							}else if(maxFilValue<parseFloat($('#payout_fil_amount').val())){
+								$('#alert3_title').text('일일 출금 한도액을 초과하셨습니다');
+								$('#alert3_modal').modal('show');
+								return;
+							}	
 							$('#request_wallet_address').text($('#payout_fil_address').val());
 							$('#request_fil_balance').text($('#payout_fil_amount').val());
 					    	$('#payout_request_modal').modal('show');
@@ -58,18 +64,8 @@ $(document).ready(function() {
 							 let user_id = $('#payout_fil_request').val();
 							 let wallet_address = $('#payout_fil_address').val(); 
 							 let wallet_type_name =$('#wallet_type_name').val();
-							 let available_fil = $('#available_fil').data('available-fil');
+							 let available_fil = $('#available_fil').val();
 							 $('#payout_request_modal').modal('hide');
-							 
-							 if(available_fil<fil_amount){
-								 if ($('#alert_header').hasClass("bg-success")) 
-										{
-								            $('#alert_header').removeClass("bg-success").addClass("bg-danger");
-							       		} 		
-							       		 $('#alert_title').text("잔고가 부족합니다.");
-								            $('#alert_modal').modal('show');
-								 return;
-							 }
 					       $.ajax({
 			                    type: "POST",
 			                    url: "/addWalletWithdrawal",
