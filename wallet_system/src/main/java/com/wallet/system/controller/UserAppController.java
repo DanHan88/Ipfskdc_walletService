@@ -276,7 +276,8 @@ public class UserAppController {
 
 	        String optionCheck;
 	        if(!adminOptionVO.isIs_request_allowed()) {
-	        	optionCheck ="현재 송금신청이 불가능합니다. 관리자에게 문의주십시오.";
+	        		//optionCheck ="현재 송금신청이 불가능합니다. 관리자에게 문의주십시오.";
+	        	optionCheck ="현재(휴일) 고객센터 업무시간 종료 되었으며 업무시간에 송금신청 하여주십시오.";
 	        	
 	        }else {
 	        	optionCheck = userAppService.checkUserRequestFundLimit(loginVO.getUserInfoVO().getUser_id(),adminOptionVO.getRequest_per_day());
