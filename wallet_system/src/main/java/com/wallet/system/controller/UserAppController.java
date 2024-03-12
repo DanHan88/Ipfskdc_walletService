@@ -408,6 +408,20 @@ public class UserAppController {
 		     }
 	    	return userFilAddressVO;
 	    } 
+	 //**>>>>>   송금 신청 2차 인증   <<<<<**//
+	   @ResponseBody
+	    @PostMapping(value = { "/secondAuth" })
+	    public String secondAuth(@RequestBody UserInfoVO userInfoVO, HttpServletRequest request) {
+		   if(!investmentService.checkSession(request,false)) {
+	    		return "failed:session_closed";
+	    	}
+	        int user_id = userInfoVO.getUser_id();     		
+	        if(!this.pwEncoder.matches((CharSequence)userInfoVO.getPassword(), userAppService.selectUserPassword(user_id))) {
+	        	return "failed:wrong_password";
+	        }
+	        
+	        return "success";
+	    }
 	   
 	
 }

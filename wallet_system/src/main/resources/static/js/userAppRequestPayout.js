@@ -8,6 +8,39 @@ function resizeWebView() {
 						    });
 						}	
 $(document).ready(function() {
+			var username = '';
+		    var password = '';
+		    var inputTimeout;
+		    var InputLength=0;
+		
+		   $('#username, #password').on('change', function() { 
+		        username = $('#username').val();
+		        password = $('#password').val();
+		        var newInputLength= username.length+password.length;
+		        if(newInputLength>5+InputLength&&username.length >= 5 && password.length >= 5){
+					console.log('자동 입력으로 간주됩니다.');
+					if($('#login_error').text()==""){
+						$('#auth_button').click();
+					}
+				}else{
+					console.log('수동 입력입니다.');
+				}
+		        InputLength=newInputLength;
+		        //checkForAutofill();
+		    });
+		
+		    function checkForAutofill() {
+		        clearTimeout(inputTimeout);
+		        username=$('#username').val();
+		        password=$('#password').val();
+		        inputTimeout = setTimeout(function() {
+		            if (username.length >= 5 && password.length >= 5) {
+		                console.log('자동 입력으로 간주됩니다.');
+		            } else {
+		                console.log('수동 입력입니다.');
+		            }
+		        }, 1000); // 1초 후에 자동 입력 여부를 확인합니다.
+		    };
     maxFilValue = Math.round(950000/$('#max_fil').text());
     $('#max_fil').text('송금 한도액 : '+maxFilValue+ 'FIL');
 	
@@ -56,8 +89,48 @@ $(document).ready(function() {
 							}	
 							$('#request_wallet_address').text($('#payout_fil_address').val());
 							$('#request_fil_balance').text($('#payout_fil_amount').val());
-					    	$('#payout_request_modal').modal('show');
+					    	$('#authenticationModal').modal('show');
 					    });
+					    
+					    $('#auth_button').on('click', function() {
+						    let user_id = $('#payout_fil_request').val();
+						    let password = $('#password').val();
+						    $.ajax({
+						        type: "POST",
+						        url: "/secondAuth",
+						        contentType: "application/json",
+						        data: JSON.stringify({
+						            user_id: user_id,
+						            password: password
+						        }),
+						        success: function (data) {
+						            $('#authenticationModal').modal('hide');
+						            if (data == 'success') {
+						                if ($('#auth_alert_header').hasClass("bg-danger")) {
+						                    $('#auth_alert_header').removeClass("bg-danger").addClass("bg-success");
+						                }
+						                $('#auth_alert_title').text("인증완료");
+						                $('#auth_alert_modal').modal('show');
+										$('#auth_confirm_button').on('click', function() {
+											 $('#auth_alert_modal').modal('hide');
+											$('#payout_request_modal').modal('show');
+											
+											});
+						                
+						                
+						            } else if (data == 'failed:session_closed') {
+						                $('#session_alert_investment').modal('show');
+						            } else {
+						                if ($('#alert_header').hasClass("bg-success")) {
+						                    $('#alert_header').removeClass("bg-success").addClass("bg-danger");
+						                }
+						                $('#alert_title').text("인증실패: 비밀번호를 확인해주세요.");
+						                $('#alert_modal').modal('show');
+						            }
+						        }
+						    });
+						});
+
 						
 						 $('#payout_confirm_button').on('click', function() {	
 							 let fil_amount= $('#payout_fil_amount').val();
